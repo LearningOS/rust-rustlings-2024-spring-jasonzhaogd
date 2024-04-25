@@ -2,19 +2,18 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
+
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
-use std::vec::*;
 
 #[derive(Debug)]
-struct Node<T> {
+struct Node<T: std::cmp::PartialOrd + Clone> {
     val: T,
     next: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Node<T> {
+impl<T: std::cmp::PartialOrd + Clone> Node<T> {
     fn new(t: T) -> Node<T> {
         Node {
             val: t,
@@ -23,19 +22,19 @@ impl<T> Node<T> {
     }
 }
 #[derive(Debug)]
-struct LinkedList<T> {
+struct LinkedList<T: std::cmp::PartialOrd + Clone> {
     length: u32,
     start: Option<NonNull<Node<T>>>,
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T: std::cmp::PartialOrd + Clone> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T: std::cmp::PartialOrd + Clone> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -69,20 +68,45 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
+	pub fn merge(mut list_a:LinkedList<T>, mut list_b:LinkedList<T>) -> Self
 	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+        let mut result = LinkedList::new();
+
+        let mut index_a = 0;
+        let mut index_b = 0;
+
+        let mut node_a = list_a.get(index_a);
+        let mut node_b = list_b.get(index_b);
+
+        while node_a != None || node_b != None {
+            if node_a != None && node_b != None {
+                if node_a.unwrap() <= node_b.unwrap() {
+                    result.add((*node_a.unwrap()).clone());
+                    index_a += 1;
+                    node_a = list_a.get(index_a);
+                } else {
+                    result.add((*node_b.unwrap()).clone());
+                    index_b += 1;
+                    node_b = list_b.get(index_b);
+                }
+            } else if node_a != None {
+                result.add((*node_a.unwrap()).clone());
+                index_a += 1;
+                node_a = list_a.get(index_a);
+            } else {
+                result.add((*node_b.unwrap()).clone());
+                index_b += 1;
+                node_b = list_b.get(index_b);
+            }
         }
+
+		result
 	}
 }
 
 impl<T> Display for LinkedList<T>
 where
-    T: Display,
+    T: Display + std::cmp::PartialOrd + Clone,
 {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self.start {
@@ -94,7 +118,7 @@ where
 
 impl<T> Display for Node<T>
 where
-    T: Display,
+    T: Display + std::cmp::PartialOrd + Clone
 {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self.next {
